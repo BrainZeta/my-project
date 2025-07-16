@@ -1,0 +1,110 @@
+from vpython import *
+#Web VPython 3.2
+from mylib import*
+
+ajusta_tela()
+
+UA =  149597870700.
+fator = 10./UA
+dt = 3600
+G = 6.67430e-11
+
+sol = sphere(color = color.yellow)
+sol.radius = 1
+sol.p = vec(0,0,0)
+sol.pos = sol.p * fator
+sol.vel = vec(0,0,0)
+sol.massa = 1.989e30
+
+terra = sphere(color = color.blue)
+terra.radius = 0.3
+terra.p = vec(1*UA, 0, 0)
+terra.pos = terra.p * fator
+terra.vel = vec(0, 29.78*1000, 0)
+terra.massa = 5.972e24
+
+mercurio = sphere(color=color.red)
+mercurio.radius = 0.2
+mercurio.p = vec(0, 0.387*UA ,0)
+mercurio.pos = mercurio.p * fator
+mercurio.vel = vec(-47.40*1000, 0, 0)
+mercurio.massa = 3.301e23
+
+
+venus = sphere(color=color.yellow)
+venus.radius = 0.1
+venus.p = vec(0, 0.723*UA ,0)
+venus.pos = venus.p * fator
+venus.vel = vec(-35.02*1000, 0, 0)
+venus.massa = 4.868*10e24
+
+
+marte = sphere(color=color.black)
+marte.radius = 0.5
+marte.p = vec(0,1.524*UA ,0)
+marte.pos = marte.p * fator
+marte.vel = vec(24.07*1000, 0, 0)
+marte.massa =  6.421*10e23
+
+
+jupiter = sphere(color=color.red)
+jupiter.radius = 0.2
+jupiter.p = vec(0,  5.203*UA ,0)
+jupiter.pos = jupiter.p * fator
+jupiter.vel = vec(-13.07*1000, 0, 0)
+jupiter.massa =  1.898*10e27
+
+
+saturno = sphere(color=color.yellow)
+saturno.radius = 1
+saturno.p = vec(0, 9.546*UA ,0)
+saturno.pos = saturno.p * fator
+saturno.vel = vec(9.69*1000, 0, 0)
+saturno.massa = 5.688*10e26
+
+urano = sphere(color=color.black)
+urano.radius = 0.5
+urano.p = vec(0,19.184*UA ,0)
+urano.pos = urano.p * fator
+urano.vel = vec(6.84*1000, 0, 0)
+urano.massa =  8.686*10e25
+
+
+netuno= sphere(color=color.red)
+netuno.radius = 0.2
+netuno.p = vec(0,  30.069*UA ,0)
+netuno.pos = netuno.p * fator
+netuno.vel = vec(-5.43*1000, 0, 0)
+netuno.massa =  1.024*10e26
+
+
+
+planetas = [sol,mercurio,venus,terra,marte,jupiter,saturno,urano,netuno]
+
+def ForcaResultante(p1):
+    F = vec(0, 0, 0)
+    m1 = p1.massa
+    for p2 in planetas:
+        if p2 is p1:
+            continue
+        r = p2.p - p1.p
+        m2 = p2.massa
+        F = F + hat(r)*(G*m1*m2)/(mag(r)**2)
+    return F
+
+while True:
+    rate(30)
+
+    for K in range(10):
+          # atualização posição
+        for planeta in planetas:
+            planeta.p = planeta.p + planeta.vel*dt
+
+        # atualização velocidade
+        for planeta in planetas:
+            F = ForcaResultante(planeta)
+            a = F/planeta.massa
+            planeta.vel = planeta.vel + a*dt
+
+    for planeta in planetas:
+        planeta.pos = planeta.p * fator
