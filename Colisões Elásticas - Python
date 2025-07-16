@@ -1,0 +1,112 @@
+from vpython import *
+import numpy as np
+
+def ColidiuBolas(b1,b2):
+    D=b1.radius+b2.radius
+    r=b2.pos-b1.pos
+    return mag(r)<=D
+    
+xmin = -10
+xmax = 10
+ymin = -10
+ymax = 10
+zmin = -10
+zmax = 10
+esp = 1
+dx = xmax-xmin
+dy = ymax-ymin
+dz = zmax-zmin
+
+p1=box(pos=vec(xmin-esp/2,0,0), size=vec(esp,dy,dz), opacity=0.5)
+p2=box(pos=vec(xmax+esp/2,0,0), size=vec(esp,dy,dz), opacity=0.5)
+p3=box(pos=vec(0,0,zmin-esp/2), size=vec(dx+2*esp,dy,esp))
+p4=box(pos=vec(0,ymin-esp/2,0), size=vec(dx+2*esp,esp,dz))
+
+N=10
+bolas=[]
+b=sphere(radius=2, color=color.yellow)
+b.massa=1
+b.vel=vec(0,0,0,)
+bolas.append(b)
+for k in range(N):
+    raio=1
+    cor=vec(np.random.rand(), np.random.rand(), np.random.rand())
+    b=sphere(radius=raio, color=cor)
+    b.massa=1
+    
+    ok=False
+    while not ok:
+        ok=True
+
+        px=(dx-2*raio)*np.random.rand()+xmin+raio
+        py=(dy-2*raio)*np.random.rand()+ymin+raio
+        pz=(dz-2*raio)*np.random.rand()+zmin+raio
+        b.pos=vec(px,py,pz)
+
+        for b2 in bolas:
+            if ColidiuBolas(b,b2):
+                ok=False
+                break
+
+
+    vx=np.random.rand()
+    vy=np.random.rand()
+    vz=np.random.rand()
+    b.vel=vec(vx,vy,vz)
+    #b.vel=vec(0,0,0)
+    bolas.append(b)
+
+t=0
+dt = 0.5
+
+while True:
+    rate(30)
+    t = t+dt
+
+    for b in bolas:
+
+        b.pos = b.pos + b.vel*dt
+
+        if b.pos.x + b.radius >= xmax:
+            b.vel.x = -b.vel.x
+            b.pos.x=xmax-b.radius
+        if b.pos.x - b.radius <=xmin:
+            b.vel.x = -b.vel.x
+            b.pos.x=xmin+b.radius
+        if b.pos.y - b.radius >=ymax:
+            b.vel.y = -b.vel.y
+            b.pos.y=ymax-b.radius
+        if b.pos.y - b.radius <=ymin:
+            b.vel.y = -b.vel.y
+            b.pos.y=ymin+b.radius
+        if b.pos.z - b.radius >=zmax:
+            b.vel.z = -b.vel.z
+            b.pos.z=zmax-b.radius
+        if b.pos.z - b.radius <=zmin:
+            b.vel.z = -b.vel.z
+            b.pos.z=zmin+b.radius
+
+        for b2 in bolas:
+            if b is b2:
+                continue
+            if ColidiuBolas(b,b2):
+                ma=b.massa
+                mb=b2.massa
+                #antes da colisão
+                ua=b.vel
+                ub=b2.vel
+                r=b2.pos-b.pos
+                uar=proj(ua,r)
+                ubr=proj(ub,r)
+                uas=ua-uar
+                ubs=ub-ubr
+                #depois da colisão
+                var=(ma-mb)*uar+2*mb*ubr/(ma+mb)
+                vbr=(2*ma*uar+(mb-ma)*uar)/(ma+mb)
+                va=var+uas
+                vb=vbr+ubs
+                b.vel=va
+                b2.vel=vb
+                while ColidiuBolas(b,b2):
+                    b.pos=b.pos+b.vel*dt*0.01
+                    b2.pos=b2.pos+b2.vel*dt*0.01
